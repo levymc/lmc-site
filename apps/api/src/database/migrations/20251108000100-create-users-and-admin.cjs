@@ -24,36 +24,36 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: Sequelize.literal("gen_random_uuid()")
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
       },
       password_hash: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
-      }
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      },
     });
 
     await queryInterface.addIndex("users", ["email"], {
       unique: true,
-      name: "users_email_unique"
+      name: "users_email_unique",
     });
 
     const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
@@ -64,13 +64,13 @@ module.exports = {
         email: ADMIN_EMAIL,
         password_hash: passwordHash,
         created_at: new Date(),
-        updated_at: new Date()
-      }
+        updated_at: new Date(),
+      },
     ]);
   },
 
   async down(queryInterface) {
     await queryInterface.bulkDelete("users", { email: ADMIN_EMAIL }, {});
     await queryInterface.dropTable("users");
-  }
+  },
 };

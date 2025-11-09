@@ -74,59 +74,60 @@ Este documento resume como organizar o repositório `lmc-site`, definir fluxos d
 ## 5. Deploy e CI/CD
 ### GitHub
 - Configure branch principal (`main`) protegida. Pull requests exigem lint/test + migrations secas.
-- Use **GitHub Actions** com workflows distintos:
-  1. `web-deploy.yml`: build Next.js (`pnpm --filter web build`), gerar imagem Docker e enviar para GitHub Container Registry (`ghcr.io`).
-  2. `api-deploy.yml`: build NestJS (`pnpm --filter api build`), rodar tests, gerar imagem.
-  3. `db-migrate.yml` (opcional): após deploy da API, executar `prisma migrate deploy` dentro do container.
+- Use **GitHub Actions** com workflows separados:
+  1. `web-deploy.yml`: instala dependências, roda lint/build e em seguida gera/push uma imagem Docker (`apps/web/Dockerfile`) para o GHCR.
+  2. `api-deploy.yml`: mesmo fluxo para a API, incluindo `pnpm --filter @lmc/api db:migrate` dentro do container após subir.
+  3. (Opcional) workflows auxiliares para smoke tests/end-to-end, se necessário.
 
 ### VPS Hostinger (`root@82.25.79.82`)
 1. **Provisionamento inicial**
    - Criar usuário `deploy` sem privilégios e liberar SSH com chave.
-   - Instalar Docker + Docker Compose plugin.
+   - Instalar Docker + Docker Compose v2.
    - Configurar firewall liberando apenas HTTP/HTTPS/SSH.
 2. **Layout no servidor**
    ```
-   /opt/lmc-site/
-     ├── docker-compose.prod.yml
-     ├── .env.api
-     ├── .env.web
-     └── .env.db
+   ~/lmc-site/
+     ├── infra/
+     │   ├── docker-compose.prod.yml
+     │   └── env/
+     │       ├── db.env
+     │       ├── api.env
+     │       └── web.env
+     └── (demais arquivos do repo)
    ```
 3. **Reverse proxy**
-   - Utilize Nginx ou Caddy na borda (pode ser outro serviço do compose) para expor:
-     - `api.lmc.com` → container NestJS (porta interna 3000)
-     - `app.lmc.com` → container Next.js (porta interna 3001)
-   - Certificados via Let's Encrypt (Caddy facilita).
+   - Use Nginx/Caddy/Traefik em frente aos containers conforme necessidade (não incluído no compose atual).
 4. **docker-compose.prod.yml** (resumido):
    ```yaml
    services:
-     db:
+     postgres:
        image: postgres:16-alpine
-       env_file: .env.db
+       env_file: ./env/db.env
        volumes:
-         - db_data:/var/lib/postgresql/data
+         - postgres_data:/var/lib/postgresql/data
+       ports: ["5432:5432"]
      api:
        image: ghcr.io/<org>/lmc-api:latest
-       env_file: .env.api
-       depends_on: [db]
+       env_file: ./env/api.env
+       depends_on:
+         postgres:
+           condition: service_healthy
+       ports: ["3001:3001"]
      web:
        image: ghcr.io/<org>/lmc-web:latest
-       env_file: .env.web
-     proxy:
-       image: caddy:2
-       volumes:
-         - ./Caddyfile:/etc/caddy/Caddyfile
-       ports: ["80:80", "443:443"]
-       depends_on: [api, web]
+       env_file: ./env/web.env
+       depends_on:
+         - api
+       ports: ["3000:3000"]
    volumes:
-     db_data:
+     postgres_data:
    ```
 5. **Deploy automatizado**
-   - Após publicar imagens no GHCR, um workflow GitHub pode rodar `ssh deploy@VPS "docker compose pull && docker compose up -d"`.
-   - Alternativa: usar Watchtower no VPS para atualizar containers quando novas imagens chegarem.
+   - Workflows se autenticam no GHCR, sobem imagens e, via SSH no VPS, executam `docker compose -f infra/docker-compose.prod.yml pull <service>` seguido de `docker compose ... up -d <service>`.
+   - Certifique-se de que os arquivos `env/*.env` existam apenas no servidor (baseados nos `.example` do repositório).
 
 ## 6. Boas práticas adicionais
-- **Versionamento de schema:** garanta que o backend só sobe após `prisma migrate deploy`. Use health checks no compose.
+- **Versionamento de schema:** garanta que o backend só sobe após `pnpm --filter @lmc/api db:migrate`. Use health checks no compose.
 - **Observabilidade:** adicione logging estruturado (pino/winston) e métricas (OpenTelemetry) no NestJS. Para Next, configure monitoramento (Sentry).
 - **Documentação:** mantenha `docs/` para decisões arquiteturais (ADR), diagramas e runbooks.
 - **Segurança:** rotacione senhas do banco, armazene secrets no GitHub Actions; use `.env.production` apenas no server.

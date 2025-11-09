@@ -15,6 +15,6 @@ export class UsersService {
   }
 
   create(payload: { name: string; email: string; passwordHash: string }) {
-    return this.userModel.create(payload);
+    return this.userModel.create(payload as User);
   }
 }

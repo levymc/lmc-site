@@ -46,20 +46,42 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label htmlFor="email">E-mail</label>
-        <input id="email" name="email" type="email" placeholder="voce@lmc.com" required />
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-foreground" htmlFor="email">
+          E-mail
+        </label>
+        <input
+          className="rounded-xl border border-border bg-white/80 px-4 py-3 text-base text-foreground placeholder:text-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+          id="email"
+          name="email"
+          type="email"
+          placeholder="voce@lmc.com"
+          required
+        />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="password">Senha</label>
-        <input id="password" name="password" type="password" placeholder="••••••••" required />
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-foreground" htmlFor="password">
+          Senha
+        </label>
+        <input
+          className="rounded-xl border border-border bg-white/80 px-4 py-3 text-base text-foreground placeholder:text-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+          id="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          required
+        />
       </div>
 
-      {status === "error" && <p className="error">{errorMessage}</p>}
+      {status === "error" && <p className="text-sm text-red-600">{errorMessage}</p>}
 
-      <button disabled={status === "submitting"} type="submit">
+      <button
+        className="rounded-xl bg-accent px-4 py-3 text-base font-semibold text-white transition hover:bg-accent-hover disabled:opacity-60"
+        disabled={status === "submitting"}
+        type="submit"
+      >
         {status === "submitting" ? "Entrando..." : "Entrar"}
       </button>
     </form>
