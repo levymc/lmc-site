@@ -1,0 +1,28 @@
+# node/pnpm artefacts
+node_modules
+.pnpm-store
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+.turbo
+
+# build outputs
+dist
+.next
+build
+
+# env files
+*.env
+*.env.local
+*.env.production
+infra/.env.db
+
+# editor/sys
+.DS_Store
+Thumbs.db
+*.log
+.idea
+.vscode
+
+# docker volumes
+postgres-data

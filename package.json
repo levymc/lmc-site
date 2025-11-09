@@ -1,0 +1,21 @@
+{
+  "name": "lmc-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo com Next.js, NestJS e Postgres (Sequelize)",
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.3.2",
+    "turbo": "^2.0.5"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
