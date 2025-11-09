@@ -78,6 +78,8 @@ jobs:
             set -e
             docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
             cd ~/lmc-site
+            mkdir -p ~/.ssh
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
             git fetch origin main
             git reset --hard origin/main
             mkdir -p infra/env
