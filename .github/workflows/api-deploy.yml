@@ -82,14 +82,14 @@ jobs:
             git reset --hard origin/main
             mkdir -p infra/env
             cat <<EOF > infra/env/db.env
-${{ secrets.PROD_DB_ENV }}
-EOF
-            cat <<EOF > infra/env/api.env
-${{ secrets.PROD_API_ENV }}
-EOF
-            cat <<EOF > infra/env/web.env
-${{ secrets.PROD_WEB_ENV }}
-EOF
-            docker compose -f infra/docker-compose.prod.yml pull api
-            docker compose -f infra/docker-compose.prod.yml up -d api
-            docker image prune -f
+            ${{ secrets.PROD_DB_ENV }}
+            EOF
+                        cat <<EOF > infra/env/api.env
+            ${{ secrets.PROD_API_ENV }}
+            EOF
+                        cat <<EOF > infra/env/web.env
+            ${{ secrets.PROD_WEB_ENV }}
+            EOF
+                        docker compose -f infra/docker-compose.prod.yml pull api
+                        docker compose -f infra/docker-compose.prod.yml up -d api
+                        docker image prune -f
