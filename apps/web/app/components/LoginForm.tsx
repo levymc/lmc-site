@@ -34,7 +34,9 @@ export function LoginForm() {
       const data = (await response.json()) as AuthResponse;
 
       // TODO: armazenar token (cookies / storage) após backend definir estratégia
-      window.localStorage.setItem("lmc.auth.token", data.token);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("lmc.auth.token", data.token);
+      }
 
       router.push("/");
     } catch (error) {
