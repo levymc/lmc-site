@@ -7,11 +7,10 @@ const mockUser = {
   name: "Convidado"
 };
 
-export default function DashboardPage() {
+export function DashboardHero() {
   const router = useRouter();
 
   const handleSignOut = () => {
-    // TODO: integrar com backend (NestJS) para invalidar sessão / token
     router.push("/login");
   };
 
